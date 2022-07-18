@@ -1,0 +1,49 @@
+name: Deploy
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Dashboard code
+        uses: actions/checkout@v3
+        with:
+          repository: sempr/cf-tool
+          branch: atcoder
+      - name: Check Commit ID
+        run: |
+          COMMIT_ID=$(git log --format="%H" -n 1)
+          echo $COMMIT_ID > commit.txt
+          echo "COMMIT_ID=${COMMIT_ID}" >> $GITHUB_ENV
+          OLD_URL=$(curl -fsSL https://github.com/sempr/at-tool/releases/latest | grep "commit.txt"| grep href | awk -F'"' '{print $2}')
+          if [ "$OLD_URL" -ne "" ]; then
+            curl -fsSL -o old_commit.txt https://github.com/$OLD_URL
+          fi
+          MSG=$(diff commit.txt old_commit.txt >/dev/null 2>&1; echo $?)
+          if [ "$MSG" -eq "0" ];then
+            echo "NEED_PUB=0" >> $GITHUB_ENV
+          else
+            echo "NEED_PUB=1" >> $GITHUB_ENV
+          fi
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+
+      - name: Build
+        run: |
+          mkdir bin
+          mv commit.txt bin/
+          make -j 8
+
+      - name: Release and upload assets
+        uses: softprops/action-gh-release@v0.1.6
+        with:
+          name: ${{ env.RELEASE_NAME }}
+          tag_name: ${{ env.TAG_NAME }}
+          draft: false
+          prerelease: false
+          files: |
+            ./bin/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
