@@ -17,7 +17,7 @@ jobs:
           echo "COMMIT_ID=${COMMIT_ID}" >> $GITHUB_ENV
           echo "TAG_NAME=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
           OLD_URL=$(curl -fsSL https://github.com/sempr/at-tool/releases/latest | grep "commit.txt"| grep href | awk -F'"' '{print $2}')
-          if [ "$OLD_URL" = "" ]; then
+          if [ "$OLD_URL" != "" ]; then
             curl -fsSL -o old_commit.txt https://github.com/$OLD_URL
           fi
           MSG=$(diff commit.txt old_commit.txt >/dev/null 2>&1; echo $?)
