@@ -5,15 +5,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Dashboard code
+      - name: Checkout at-tool code
         uses: actions/checkout@v3
         with:
-          repository: sempr/cf-tool@atcoder
+          repository: sempr/cf-tool
+          ref: atcoder
       - name: Check Commit ID
         run: |
           COMMIT_ID=$(git log --format="%H" -n 1)
           echo $COMMIT_ID > commit.txt
           echo "COMMIT_ID=${COMMIT_ID}" >> $GITHUB_ENV
+          echo "TAG_NAME=$(date +%Y%m%d%H%M)" >> $GITHUB_ENV
           OLD_URL=$(curl -fsSL https://github.com/sempr/at-tool/releases/latest | grep "commit.txt"| grep href | awk -F'"' '{print $2}')
           if [ "$OLD_URL" -ne "" ]; then
             curl -fsSL -o old_commit.txt https://github.com/$OLD_URL
