@@ -8,8 +8,7 @@ jobs:
       - name: Checkout Dashboard code
         uses: actions/checkout@v3
         with:
-          repository: sempr/cf-tool
-          branch: atcoder
+          repository: sempr/cf-tool@atcoder
       - name: Check Commit ID
         run: |
           COMMIT_ID=$(git log --format="%H" -n 1)
